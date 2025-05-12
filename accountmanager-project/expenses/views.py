@@ -6,7 +6,52 @@ import pandas as pd
 from .models import Expenses, Category
 from .serializers import ExpensesSerializer, CategorySerializer
 from rest_framework import status, generics
-from rest_framework.renderers import JSONRenderer
+from django.db.models import Sum, Avg
+from django.db.models.functions import TruncMonth
+from collections import defaultdict
+
+
+class ExpensesSummaryView(APIView):
+    def get(self, request):
+        expenses = Expenses.objects.select_related('category').all()
+
+        # Setup data structures
+        summary = defaultdict(lambda: defaultdict(float))
+        totals = defaultdict(float)
+        months_set = set()
+
+        # Fill the summary with category totals per month
+        for expense in expenses:
+            if expense.purchase_date and expense.amount and expense.category:
+                month = expense.purchase_date.strftime("%Y-%m")
+                category = expense.category.category_name
+                amount = float(expense.amount)
+
+                summary[month][category] += amount
+                summary[month]["total"] += amount
+                totals[category] += amount
+                months_set.add(month)
+
+        # Calculate average per category across months
+        num_months = len(months_set)
+        averages = {}
+        if num_months > 0:
+            for category, total in totals.items():
+                averages[category] = round(total / num_months, 2)
+
+        # Format data into a normal dict
+        summary = {month: dict(values) for month, values in summary.items()}
+
+        # Return all category names for consistent column rendering
+        categories = list(Category.objects.values_list('category_name', flat=True))
+
+        return Response({
+            "categories": categories,
+            "data": summary,
+            "averages": averages
+        })
+
+
 
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()

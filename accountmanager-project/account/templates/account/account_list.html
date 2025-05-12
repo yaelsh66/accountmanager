@@ -1,0 +1,47 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+
+<br>
+<a  href={% url 'account:account_create' %}>Create new expense</a>
+<br>
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">user</th>
+        <th scope="col">title</th>
+        <th scope="col">category</th>
+        <th scope="col">amount</th>
+        <th scope="col">date</th>
+        <th scope="col">isStandingOrder</th>
+      </tr>
+    </thead>
+    
+    {% for account in my_account_list.all %}
+    
+    <tbody>
+      <tr>
+        <th scope="row">{{ account.pk }}</th>
+        <td>
+
+          <a  href={% url 'account:account_delete' account.pk %}><i class="fa-solid fa-trash-can"></i></a>
+          <a  href={% url 'account:account_update' account.pk %}><i class="fa-solid fa-pen-to-square"></i></a>
+          <a  href={% url 'account:account_detail' account.pk %}>{{ account.user }}</a>
+          
+          
+
+        </td>
+        <td>{{ account.title }}</td>
+        <td>{{ account.category }}</td>
+        <td>{{ account.amount }}</td>
+        <td>{{ account.date }}</td>
+        <td>{{ account.isStandingOrder }}</td>
+      </tr>
+      
+    </tbody>
+  
+
+{% endfor %}
+</table>
+{% endblock  %}

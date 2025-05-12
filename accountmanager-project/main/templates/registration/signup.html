@@ -1,0 +1,19 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+<h1>Sign Up</h1>
+<hr>
+    {% if error %}
+    <h3>Somthing went wrong</h3>
+    <p color="red">{{ error }}</p>
+    {% endif %}
+    
+    <h2>Signup</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p}}
+        <button type="submit" name="button">Sign Up</button>
+    </form>
+
+
+{% endblock  %}
